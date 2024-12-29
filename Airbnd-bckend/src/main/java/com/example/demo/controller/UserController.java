@@ -19,6 +19,8 @@ import com.example.demo.model.Train;
 import com.example.demo.model.User;
 import com.example.demo.repo.UserRepo;
 import com.example.demo.service.UserService;
+import com.example.demo.util.JwtFilter;
+import com.example.demo.util.JwtUtil;
 
 
 @RestController
@@ -31,6 +33,11 @@ public class UserController {
 	@Autowired
 	private UserRepo userRepo;
 	
+	@Autowired
+	private JwtUtil jwtUtil;
+	
+	@Autowired
+	private JwtFilter jwtFilter;
 
 	
 	@PostMapping("/login")
@@ -41,7 +48,10 @@ public class UserController {
 		Optional<User> user = userRepo.findByUsername(username);
 		if(user.isPresent() && user.get().getPassword().equals(password)) {
 			Map<String, String> response = new HashMap<>();
+			String token = jwtUtil.generateToken(username);
 			response.put("login", "success");
+			response.put("token", token);
+			response.put("role", user.get().getRole());   
 	
 			 return ResponseEntity.ok(response);
 		}else {
@@ -64,6 +74,22 @@ public class UserController {
 	@GetMapping("/user/trains")
 	public List<Train> getTrains(){
 		return userService.getTrain();
+	}
+	
+	public JwtFilter getJwtFilter() {
+		return jwtFilter;	
+	}
+
+	public void setJwtFilter(JwtFilter jwtFilter) {
+		this.jwtFilter = jwtFilter;
+	}
+
+	public JwtUtil getJwtUtil() {
+		return jwtUtil;
+	}
+
+	public void setJwtUtil(JwtUtil jwtUtil) {
+		this.jwtUtil = jwtUtil;
 	}
 
 }

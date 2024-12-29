@@ -1,0 +1,31 @@
+package com.example.demo.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.web.SecurityFilterChain;
+
+import com.example.demo.util.JwtFilter;
+
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
+@Configuration
+public class SecurityConfig {
+	
+    private final JwtFilter jwtFilter;
+
+    public SecurityConfig(JwtFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
+	 @Bean
+	    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	        http.csrf().disable()
+	            .authorizeHttpRequests()
+	            .requestMatchers("/user/hotels","/user/buses","/user/trains").permitAll() // Allow access to this endpoint
+	            .anyRequest().authenticated()
+	            ).sessionManagement(session -> session
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless session for JWT
+    )
+    .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Secure other endpoints
+	        return http.build();
+	    }
+}
